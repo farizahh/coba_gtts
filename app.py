@@ -26,13 +26,12 @@ def video_frame_callback(frame):
     return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
 
 # Tampilkan kamera dan deteksi
-webrtc_streamer(
-    key="example",
-    mode=WebRtcMode.SENDRECV,  # Mode normal dua arah
-    rtc_configuration={
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
-    },
-    media_stream_constraints={"video": True, "audio": False}
+webrtc_ctx = webrtc_streamer(
+    key="object-detection",
+    mode=WebRtcMode.SENDRECV,
+    video_frame_callback=video_frame_callback,
+    media_stream_constraints={"video": True, "audio": False},
+    async_processing=True,
 )
 
 
