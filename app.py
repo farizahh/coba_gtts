@@ -1,37 +1,27 @@
 import streamlit as st
-from streamlit_webrtc import (
-    WebRtcMode,
-    webrtc_streamer,
-    __version__ as st_webrtc_version,
-)
-
+from streamlit_webrtc import webrtc_streamer, WebRtcMode
 from ultralytics import YOLO
-import cv2
 import av
 
-# Load YOLOv8 model
-model = YOLO("bisindo_yolov8.pt")  # Pastikan file .pt ada di folder yang sama
+# Cache/load model
+cache_key = "yolov8_model"
+if cache_key in st.session_state:
+    model = st.session_state[cache_key]
+else:
+    model = YOLO("bisindo_yolov8.pt")
+    st.session_state[cache_key] = model
 
-st.title("Pendeteksi Bahasa Isyarat BISINDO")
-st.write("Menggunakan YOLOv8 + Streamlit WebRTC")
-
-# Proses frame video
 def video_frame_callback(frame):
     img = frame.to_ndarray(format="bgr24")
+    result = st.session_state[cache_key](img)[0]
+    annotated = result.plot()
+    return av.VideoFrame.from_ndarray(annotated, format="bgr24")
 
-    # Deteksi pakai YOLO
-    results = model(img)
-    annotated_frame = results[0].plot()
-
-    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
-
-# Tampilkan kamera dan deteksi
-webrtc_ctx = webrtc_streamer(
+webrtc_streamer(
     key="object-detection",
     mode=WebRtcMode.SENDRECV,
     video_frame_callback=video_frame_callback,
     media_stream_constraints={"video": True, "audio": False},
+    rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
     async_processing=True,
 )
-
-
