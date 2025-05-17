@@ -1,5 +1,10 @@
 import streamlit as st
-from streamlit_webrtc import webrtc_streamer
+from streamlit_webrtc import (
+    WebRtcMode,
+    webrtc_streamer,
+    __version__ as st_webrtc_version,
+)
+
 from ultralytics import YOLO
 import cv2
 import av
@@ -23,11 +28,11 @@ def video_frame_callback(frame):
 # Tampilkan kamera dan deteksi
 webrtc_streamer(
     key="example",
+    mode=WebRtcMode.SENDRECV,  # Mode normal dua arah
     rtc_configuration={
-        "iceServers": [
-            {"urls": ["stun:stun.l.google.com:19302"]}
-        ]
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
     },
     media_stream_constraints={"video": True, "audio": False}
 )
+
 
