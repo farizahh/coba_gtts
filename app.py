@@ -22,10 +22,12 @@ def video_frame_callback(frame):
 
 # Tampilkan kamera dan deteksi
 webrtc_streamer(
-    key="bisindo",
-    video_frame_callback=video_frame_callback,
+    key="example",
     rtc_configuration={
-        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+        "iceServers": [
+            {"urls": ["stun:stun.l.google.com:19302"]}
+        ]
     },
     media_stream_constraints={"video": True, "audio": False}
 )
+
