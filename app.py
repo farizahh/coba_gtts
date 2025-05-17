@@ -1,15 +1,31 @@
 import streamlit as st
 from streamlit_webrtc import webrtc_streamer
+from ultralytics import YOLO
+import cv2
+import av
 
-st.title("My first Streamlit app")
-st.write("Hello, world")
+# Load YOLOv8 model
+model = YOLO("bisindo_yolov8.pt")  # Pastikan file .pt ada di folder yang sama
 
-# Tambahkan konfigurasi STUN server di sini
+st.title("Pendeteksi Bahasa Isyarat BISINDO")
+st.write("Menggunakan YOLOv8 + Streamlit WebRTC")
+
+# Proses frame video
+def video_frame_callback(frame):
+    img = frame.to_ndarray(format="bgr24")
+
+    # Deteksi pakai YOLO
+    results = model(img)
+    annotated_frame = results[0].plot()
+
+    return av.VideoFrame.from_ndarray(annotated_frame, format="bgr24")
+
+# Tampilkan kamera dan deteksi
 webrtc_streamer(
-    key="example",
+    key="bisindo",
+    video_frame_callback=video_frame_callback,
     rtc_configuration={
-        "iceServers": [
-            {"urls": ["stun:stun.l.google.com:19302"]}
-        ]
-    }
+        "iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]
+    },
+    media_stream_constraints={"video": True, "audio": False}
 )
